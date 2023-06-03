@@ -8,7 +8,7 @@ import base64
 import urllib
 
 app = Flask(__name__, template_folder='templates')
-app.secret_key = 'secret'
+app.secret_key = 'secret!'
 models_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../models')
 models = {f.split('.')[0]: tf.keras.models.load_model(os.path.join(models_dir, f)) for f in os.listdir('../models') if
           f.endswith('.h5')}
@@ -30,7 +30,11 @@ def index():
             return render_template('index.html', result=result, model=model_selected, models=models.keys())
 
         try:
-            values = np.array([float(x) for x in request.form['values'].split(',') if x])
+            # recuperer les valeurs
+            datas = request.form['values']
+            occurrences = {separator: datas.count(separator) for separator in [',', '\t', ' ']}
+            most_used_spearator = max(occurrences, key=occurrences.get)
+            values = np.array([float(x) for x in datas.split(most_used_spearator) if x])
             if values.size == 0:
                 flash("Aucune valeur fournie", 'error')
                 return render_template('index.html', result=result, model=model_selected, models=models.keys())
@@ -41,7 +45,8 @@ def index():
 
         try:
             predictions = models[model_selected].predict(values)
-            result = int(predictions[0][0] >= 0.5)
+            result = f"sain avec une certitude de {int((predictions[0][0]) * 100)}%" if predictions[0][0] >= 0.5 \
+                else f"malade avec une certitude de {int((1 - predictions[0][0]) * 100)}%"
         except Exception as e:
             flash("Erreur lors de la prédiction", 'error')
             return render_template('index.html', result=result, model=model_selected, models=models.keys())
@@ -49,9 +54,9 @@ def index():
         # Sauvegarde du graphique
         plt.figure()
         plt.plot(values[0])
-        plt.title(f"Patient's data")
-        plt.xlabel('Time')
-        plt.ylabel('Value')
+        plt.title(f"Donnée du patient")
+        plt.xlabel('Temps')
+        plt.ylabel('Valeur')
         bytes_image = io.BytesIO()
         plt.savefig(bytes_image, format='png')
         bytes_image.seek(0)

@@ -4,8 +4,17 @@
     <title>Prédiction cardiaque</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
+        .container{
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+        article{
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+        p{ text-align: center}
         .flash-message.error {
-            margin: 1rem auto;
+            margin: 0.5rem auto;
             background-color: #F8D7DA;
             border-left: 6px solid #F5C6CB;
             color: #720B00;
@@ -33,6 +42,7 @@
             90% { transform: translate(1px, 2px) rotate(0deg); }
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
+
     </style>
 </head>
 <body>
@@ -46,24 +56,31 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <h1>Prédiction cardiaque</h1>
-    <form method="POST">
-        <label for="values">Entrer (séparé par des virgules) : </label><br>
-        <textarea id="values" name="values"></textarea><br>
-        <label for="model">Choisir un modèle :</label><br>
-        <select id="model" name="model">
-            {% for model in models %}
-            <option value="{{ model }}">{{ model }}</option>
-            {% endfor %}
-        </select><br>
-        <input type="submit" value="Predict">
-    </form>
-    {% if plot_url %}
-    <img src="data:image/png;base64,{{ plot_url }}">
-    {% endif %}
-    {% if result is not none %}
-    <p>{{ model.upper() }} Prediction: {{ result }}</p>
-    {% endif %}
+    <h2>Prédiction cardiaque</h2>
+    <article class="grid">
+        <form method="POST">
+            <label for="values">Donnée du patient : </label>
+            <textarea id="values" name="values"></textarea><br>
+            <label for="model">Choisir un modèle :</label>
+            <select id="model" name="model">
+                {% for model in models %}
+                <option value="{{ model }}">{{ model }}</option>
+                {% endfor %}
+            </select><br>
+            <input type="submit" value="Prédire">
+        </form>
+
+        {% if plot_url %}
+        <div class="right">
+            <img src="data:image/png;base64,{{ plot_url }}">
+        {% endif %}
+        {% if result is not none %}
+            <p>{{ model.upper() }} <br> Le patient est {{ result }}</p>
+        </div>
+        {% endif %}
+
+    </article>
+
 </main>
 </body>
 </html>

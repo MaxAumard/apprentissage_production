@@ -1,0 +1,8 @@
+services:
+  python-ia:
+    build: .
+    command: python3 -m src.ia
+
+  python-app:
+    build: .
+    command: python3 -m src.app
