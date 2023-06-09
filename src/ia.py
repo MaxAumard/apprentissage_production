@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras import layers, Sequential
 import matplotlib.pyplot as plt
-
+import time
 # Chargement des données
 train_data = pd.read_csv('https://maxime-devanne.com/datasets/ECG200/ECG200_TRAIN.tsv', sep='\t', header=None)
 test_data = pd.read_csv('https://maxime-devanne.com/datasets/ECG200/ECG200_TEST.tsv', sep='\t', header=None)
