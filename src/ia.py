@@ -42,8 +42,8 @@ model_cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['a
 model_rnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Entrainement
-history_cnn = model_cnn.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_labels))
-history_rnn = model_rnn.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_labels))
+history_cnn = model_cnn.fit(train_data, train_labels, epochs=50, validation_data=(test_data, test_labels))
+history_rnn = model_rnn.fit(train_data, train_labels, epochs=50, validation_data=(test_data, test_labels))
 
 
 # Sauvegarde du modèle CNN dans un fichier h5
