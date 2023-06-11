@@ -1,3 +1,6 @@
+import os
+import shutil
+
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -8,13 +11,14 @@ import time
 train_data = pd.read_csv('https://maxime-devanne.com/datasets/ECG200/ECG200_TRAIN.tsv', sep='\t', header=None)
 test_data = pd.read_csv('https://maxime-devanne.com/datasets/ECG200/ECG200_TEST.tsv', sep='\t', header=None)
 
-train_labels = train_data.pop(0)
-test_labels = test_data.pop(0)
+train_labels = train_data.pop(0).apply(lambda x: 1 if x == 1 else 0)
+test_labels = test_data.pop(0).apply(lambda x: 1 if x == 1 else 0)
 
 # Encodage one hote
 train_labels = tf.keras.utils.to_categorical(train_labels, num_classes=2)
 test_labels = tf.keras.utils.to_categorical(test_labels, num_classes=2)
-
+print(train_labels)
+print(train_data)
 # Modèle de réseau neuronal convolutionnel (CNN)
 model_cnn = Sequential([
     layers.Conv1D(64, 3, activation='relu', input_shape=(train_data.shape[1], 1)),
@@ -45,7 +49,6 @@ model_rnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['a
 history_cnn = model_cnn.fit(train_data, train_labels, epochs=50, validation_data=(test_data, test_labels))
 history_rnn = model_rnn.fit(train_data, train_labels, epochs=50, validation_data=(test_data, test_labels))
 
-
 # Sauvegarde du modèle CNN dans un fichier h5
-model_cnn.save('../models/model_cnn.h5')
-model_rnn.save('../models/model_rnn.h5')
+model_cnn.save('./models/model_cnn.h5')
+model_rnn.save('./models/model_rnn.h5')

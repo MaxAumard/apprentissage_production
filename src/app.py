@@ -9,8 +9,13 @@ import urllib
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret!'
-models_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../models')
-models = {f.split('.')[0]: tf.keras.models.load_model(os.path.join(models_dir, f)) for f in os.listdir('../models') if
+models_dir = os.path.join(os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+), 'models')
+print(models_dir)
+models = {f.split('.')[0]: tf.keras.models.load_model(os.path.join(models_dir, f)) for f in os.listdir(models_dir) if
           f.endswith('.h5')}
 
 
@@ -35,6 +40,7 @@ def index():
             occurrences = {separator: datas.count(separator) for separator in [',', '\t', ' ']}
             most_used_spearator = max(occurrences, key=occurrences.get)
             values = np.array([float(x) for x in datas.split(most_used_spearator) if x])
+            print(values)
             if values.size == 0:
                 flash("Aucune valeur fournie", 'error')
                 return render_template('index.html', result=result, model=model_selected, models=models.keys())
@@ -45,8 +51,9 @@ def index():
 
         try:
             predictions = models[model_selected].predict(values)
-            result = f"sain avec une certitude de {int((predictions[0][0]) * 100)}%" if predictions[0][0] >= 0.5 \
-                else f"malade avec une certitude de {int((1 - predictions[0][0]) * 100)}%"
+            print(predictions)
+            result = f"sain avec une certitude de {int((predictions[0][1]) * 100)}%" if predictions[0][1] >= 0.5 \
+                else f"malade avec une certitude de {int((1 - predictions[0][1]) * 100)}%"
         except Exception as e:
             flash("Erreur lors de la prédiction", 'error')
             return render_template('index.html', result=result, model=model_selected, models=models.keys())
