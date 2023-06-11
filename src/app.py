@@ -1,31 +1,36 @@
-from flask import Flask, request, render_template, flash
+import base64
+import io
+import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import os
-import io
-import base64
-import urllib
+from flask import Flask, request, render_template, flash
 
+# Création de l'application
 app = Flask(__name__, template_folder='templates')
 app.secret_key = 'secret!'
-models_dir = os.path.join(os.path.dirname(
-    os.path.dirname(
-        os.path.abspath(__file__)
-    )
-), 'models')
-print(models_dir)
+
+# Chargement des modèles
+models_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models')
 models = {f.split('.')[0]: tf.keras.models.load_model(os.path.join(models_dir, f)) for f in os.listdir(models_dir) if
           f.endswith('.h5')}
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    '''
+    Page d'accueil
+    :return:
+    '''
+
     result = None
     model_selected = None
     plot_url = None
+    # Si des données sont envoyées
     if request.method == 'POST':
         try:
+            # recuperer le modèle
             model_selected = request.form['model']
             if model_selected not in models:
                 flash("Modèle non trouvé", 'error')
@@ -37,10 +42,11 @@ def index():
         try:
             # recuperer les valeurs
             datas = request.form['values']
+            # séparer les valeurs par le séparateur le plus utilisé
             occurrences = {separator: datas.count(separator) for separator in [',', '\t', ' ']}
             most_used_spearator = max(occurrences, key=occurrences.get)
             values = np.array([float(x) for x in datas.split(most_used_spearator) if x])
-            print(values)
+
             if values.size == 0:
                 flash("Aucune valeur fournie", 'error')
                 return render_template('index.html', result=result, model=model_selected, models=models.keys())
@@ -50,15 +56,15 @@ def index():
             return render_template('index.html', result=result, model=model_selected, models=models.keys())
 
         try:
+            # prédictions
             predictions = models[model_selected].predict(values)
-            print(predictions)
             result = f"sain avec une certitude de {int((predictions[0][1]) * 100)}%" if predictions[0][1] >= 0.5 \
                 else f"malade avec une certitude de {int((1 - predictions[0][1]) * 100)}%"
         except Exception as e:
             flash("Erreur lors de la prédiction", 'error')
             return render_template('index.html', result=result, model=model_selected, models=models.keys())
 
-        # Sauvegarde du graphique
+        # Sauvegarde du graphique du signal rentré
         plt.figure()
         plt.plot(values[0])
         plt.title(f"Donnée du patient")
